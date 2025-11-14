@@ -14,7 +14,7 @@ boot_param_CI(nsim, model, data)
 \item{data}{dataframe used in the model}
 }
 \value{
-model results for all bootstrap iterations, model parameter 95\% confidence interval table and plot
+returns model parameters for all bootstrap iterations and 95\% confidence interval plots and dataframe
 }
 \description{
 Bootstrapping confidence intervals for lme4 and glmmTMB

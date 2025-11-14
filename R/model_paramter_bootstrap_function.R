@@ -3,7 +3,7 @@
 #' @param nsim number of iteration for the bootstrap
 #' @param model lme4 (merMod) or glmmTMB model object
 #' @param data dataframe used in the model
-#' @return model results for all bootstrap iterations, model parameter 95% confidence interval table and plot
+#' @return returns model parameters for all bootstrap iterations and 95% confidence interval plots and dataframe 
 #' @export
 #' @import ggplot2
 #' @importFrom data.table %like%
