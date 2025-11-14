@@ -11,6 +11,11 @@
 #' zero inflated negative binomial 
 
 
+#' #loading packages
+library(dplyr)
+library(ggplot2)
+
+#defining function
 boot_param_CI <- function(nsim, model, data){
   
   #so I don't have to load the whole package
