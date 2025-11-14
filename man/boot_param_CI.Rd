@@ -2,20 +2,20 @@
 % Please edit documentation in R/model_paramter_bootstrap_function.R
 \name{boot_param_CI}
 \alias{boot_param_CI}
-\title{lme4 and glmmTMB
-Poisson
-negative binomial
-binomial
-zero inflated Poisson
-zero inflated negative binomial}
+\title{Bootstrapping confidence intervals for lme4 and glmmTMB}
 \usage{
 boot_param_CI(nsim, model, data)
 }
+\arguments{
+\item{nsim}{number of iteration for the bootstrap}
+
+\item{model}{lme4 (merMod) or glmmTMB model object}
+
+\item{data}{dataframe used in the model}
+}
+\value{
+model results for all bootstrap iterations, model parameter 95\% confidence interval table and plot
+}
 \description{
-lme4 and glmmTMB
-Poisson
-negative binomial
-binomial
-zero inflated Poisson
-zero inflated negative binomial
+Bootstrapping confidence intervals for lme4 and glmmTMB
 }

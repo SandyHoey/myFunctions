@@ -5,15 +5,13 @@
 #' @param data dataframe used in the model
 #' @return model results for all bootstrap iterations, model parameter 95% confidence interval table and plot
 #' @export
-#'
-#' @examples boot_param_CI(nsim = 1000, model = mod1, data = mod1_data)
+#' @import ggplot2
+#' @importFrom data.table %like%
+#' @importFrom boot inv.logit
+
 
 #defining function
 boot_param_CI <- function(nsim, model, data){
-  
-  #so I don't have to load the whole package
-  `%like%` <- data.table::`%like%`
-  
   
   # lme4 --------------------------------------------------------------------
   ## code for lme4 models
@@ -88,9 +86,9 @@ boot_param_CI <- function(nsim, model, data){
     if(model@call$family == "binomial"){  
       
       beta_bs <- data.frame(FE = names(fixef(model)),
-                            coef = boot::inv.logit(fixef(model)),
-                            lower = boot::inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                            upper = boot::inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                            coef = inv.logit(fixef(model)),
+                            lower = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
+                            upper = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
       
       
       #plotting model coefficients
@@ -262,9 +260,9 @@ boot_param_CI <- function(nsim, model, data){
       if(model$call$family == "binomial"){  
         
         beta_bs <- data.frame(FE = names(fixef(sim_model)$cond),
-                              coef = boot::inv.logit(fixef(sim_model)$cond),
-                              lower = boot::inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                              upper = boot::inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                              coef = inv.logit(fixef(sim_model)$cond),
+                              lower = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
+                              upper = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
         
         #plotting model coefficients
