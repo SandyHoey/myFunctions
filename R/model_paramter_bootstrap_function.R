@@ -1,14 +1,12 @@
-#function to bootstrap parameter confidence intervals from glmer models
-
-#works by simulating data from the model, and the refitting the model with the simulated data and recording the parameters
-
-#currently works with
-#' lme4 and glmmTMB
-#' Poisson
-#' negative binomial
-#' binomial
-#' zero inflated Poisson
-#' zero inflated negative binomial 
+#' Bootstrapping confidence intervals for lme4 and glmmTMB
+#'
+#' @param nsim number of iteration for the bootstrap
+#' @param model lme4 (merMod) or glmmTMB model object
+#' @param data dataframe used in the model
+#' @return model results for all bootstrap iterations, model parameter 95% confidence interval table and plot
+#' @export
+#'
+#' @examples boot_param_CI(nsim = 1000, model = mod1, data = mod1_data)
 
 #defining function
 boot_param_CI <- function(nsim, model, data){
