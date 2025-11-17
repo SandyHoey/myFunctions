@@ -7,7 +7,6 @@
 #' @export
 #' @import ggplot2
 #' @importFrom data.table %like%
-#' @importFrom boot inv.logit
 
 
 #defining function
@@ -86,9 +85,9 @@ boot_param_CI <- function(nsim, model, data){
     if(model@call$family == "binomial"){  
       
       beta_bs <- data.frame(FE = names(fixef(model)),
-                            coef = inv.logit(fixef(model)),
-                            lower = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                            upper = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                            coef = plogis(fixef(model)),
+                            lower = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
+                            upper = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
       
       
       #plotting model coefficients
@@ -104,7 +103,7 @@ boot_param_CI <- function(nsim, model, data){
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                subtitle = "binomial",
                y = "",
-               x = "inv.logit(\u03b2)"))
+               x = "plogis(\u03b2)"))
     }
   }
   
@@ -260,9 +259,9 @@ boot_param_CI <- function(nsim, model, data){
       if(model$call$family == "binomial"){  
         
         beta_bs <- data.frame(FE = names(fixef(sim_model)$cond),
-                              coef = inv.logit(fixef(sim_model)$cond),
-                              lower = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                              upper = inv.logit(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                              coef = plogis(fixef(sim_model)$cond),
+                              lower = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
+                              upper = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
         
         #plotting model coefficients
@@ -278,7 +277,7 @@ boot_param_CI <- function(nsim, model, data){
             labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                  subtitle = "binomial",
                  y = "",
-                 x = "inv.logit(\u03b2)"))
+                 x = "plogis(\u03b2)"))
       }
     }
   }

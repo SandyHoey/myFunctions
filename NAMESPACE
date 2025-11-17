@@ -2,5 +2,4 @@
 
 export(boot_param_CI)
 import(ggplot2)
-importFrom(boot,inv.logit)
 importFrom(data.table,"%like%")
