@@ -12,7 +12,6 @@
 #' @importFrom dplyr filter
 #' @importFrom lme4 fixef
 #' @importFrom data.table %like%
-#' @importFrom purrr set_names
 
 
 #defining function
@@ -143,8 +142,8 @@ boot_param_CI <- function(nsim, model, data){
       
       ### Poisson ----
       if(model$call$family == "poisson"){  
-        beta_bs <- data.frame(FE = c(paste0("cond:", names(fixef(sim_model)$cond)), 
-                                     paste0("zi:", names(fixef(sim_model)$zi))),
+        beta_bs <- data.frame(FE = c(names(fixef(sim_model)$cond), 
+                                     names(fixef(sim_model)$zi)),
                               model = c(rep("conditional", length(fixef(sim_model)$cond)),
                                         rep("zi", length(fixef(sim_model)$zi))), # column for the model type
                               coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
@@ -155,9 +154,10 @@ boot_param_CI <- function(nsim, model, data){
                  upper = if_else(model == "conditional", plogis(upper), exp(upper))) %>% 
           #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
-          group_split() %>% 
-          #setting dataframe names in list
-          set_names(c("conditional", "zi"))
+          group_split()
+        
+        #setting dataframe names in list
+        names(beta_bs) <- c("conditional", "zi")
           
         
         #plotting model coefficients
@@ -171,7 +171,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Binomial",
+               subtitle = "Conditional (binomial)",
                y = "",
                x = "inv.logit(\u03b2)")
         
@@ -185,7 +185,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Poisson",
+               subtitle = "Zero inflated (poisson)",
                y = "",
                x = "exp(\u03b2)")
         
@@ -195,8 +195,8 @@ boot_param_CI <- function(nsim, model, data){
       
       ### negative binomial ----
       if(model$call$family == "nbinom2"){  
-        beta_bs <- data.frame(FE = c(paste0("cond:", names(fixef(sim_model)$cond)), 
-                                     paste0("zi:", names(fixef(sim_model)$zi))),
+        beta_bs <- data.frame(FE = c(names(fixef(sim_model)$cond), 
+                                     names(fixef(sim_model)$zi)),
                               model = c(rep("conditional", length(fixef(sim_model)$cond)),
                                         rep("zi", length(fixef(sim_model)$zi))), # column for the model type
                               coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
@@ -207,9 +207,10 @@ boot_param_CI <- function(nsim, model, data){
                  upper = if_else(model == "conditional", plogis(upper), exp(upper))) %>% 
           #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
-          group_split() %>% 
-          #setting dataframe names in list
-          set_names(c("conditional", "zi"))
+          group_split()
+        
+        #setting dataframe names in list
+        names(beta_bs) <- c("conditional", "zi")
         
         
         #plotting model coefficients
@@ -223,7 +224,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Binomial",
+               subtitle = "Conditional (binomial)",
                y = "",
                x = "inv.logit(\u03b2)")
         
@@ -237,7 +238,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Negative binomial",
+               subtitle = "Zero inflated (negative binomial)",
                y = "",
                x = "exp(\u03b2)")
         
