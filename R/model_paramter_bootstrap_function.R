@@ -170,8 +170,8 @@ boot_param_CI <- function(nsim, model, data){
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
-          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Conditional (binomial)",
+          labs(title = "Conditional model fixed effects",
+               subtitle = paste0("Binomial  (iterations = ", n_fit, ")"),
                y = "",
                x = "inv.logit(\u03b2)")
         
@@ -184,8 +184,8 @@ boot_param_CI <- function(nsim, model, data){
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
-          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Zero inflated (poisson)",
+          labs(title = "Zero inflated model fixed effects",
+               subtitle = paste0("Poisson  (iterations = ", n_fit, ")"),
                y = "",
                x = "exp(\u03b2)")
         
@@ -223,8 +223,8 @@ boot_param_CI <- function(nsim, model, data){
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
-          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Conditional (binomial)",
+          labs(title = "Conditional model fixed effects",
+               subtitle = paste0("Binomial  (iterations = ", n_fit, ")"),
                y = "",
                x = "inv.logit(\u03b2)")
         
@@ -237,8 +237,8 @@ boot_param_CI <- function(nsim, model, data){
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
-          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-               subtitle = "Zero inflated (negative binomial)",
+          labs(title = "Zero inflated model fixed effects",
+               subtitle = paste0("Negative binomial  (iterations = ", n_fit, ")"),
                y = "",
                x = "exp(\u03b2)")
         
