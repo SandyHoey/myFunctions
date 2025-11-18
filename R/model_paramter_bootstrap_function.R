@@ -5,8 +5,14 @@
 #' @param data dataframe used in the model
 #' @return returns model parameters for all bootstrap iterations and 95% confidence interval plots and dataframe 
 #' @export
+#' @import stats
+#' @import dplyr
 #' @import ggplot2
+#' @import patchwork
+#' @importFrom dplyr filter
+#' @importFrom lme4 fixef
 #' @importFrom data.table %like%
+#' @importFrom purrr set_names
 
 
 #defining function
@@ -44,7 +50,7 @@ boot_param_CI <- function(nsim, model, data){
       
       #plotting model coefficients
       (beta_plot <- beta_bs %>% 
-          filter(FE != "(Intercept)") %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -67,7 +73,7 @@ boot_param_CI <- function(nsim, model, data){
       
       #plotting model coefficients
       (beta_plot <- beta_bs %>% 
-          filter(FE != "(Intercept)") %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -92,7 +98,7 @@ boot_param_CI <- function(nsim, model, data){
       
       #plotting model coefficients
       (beta_plot <- beta_bs %>% 
-          filter(FE != "(Intercept)") %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -103,7 +109,7 @@ boot_param_CI <- function(nsim, model, data){
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                subtitle = "binomial",
                y = "",
-               x = "plogis(\u03b2)"))
+               x = "inv.logit(\u03b2)"))
     }
   }
   
@@ -139,50 +145,104 @@ boot_param_CI <- function(nsim, model, data){
       if(model$call$family == "poisson"){  
         beta_bs <- data.frame(FE = c(paste0("cond:", names(fixef(sim_model)$cond)), 
                                      paste0("zi:", names(fixef(sim_model)$zi))),
-                              coef = exp(c(fixef(sim_model)$cond, fixef(sim_model)$zi)),
-                              lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                              upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                              model = c(rep("conditional", length(fixef(sim_model)$cond)),
+                                        rep("zi", length(fixef(sim_model)$zi))), # column for the model type
+                              coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
+                              lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
+                              upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
+          #back-transforming CI bounds based on the model (con, zi)
+          mutate(lower = if_else(model == "conditional", plogis(lower), exp(lower)),
+                 upper = if_else(model == "conditional", plogis(upper), exp(upper))) %>% 
+          #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
+          group_by(model) %>% 
+          group_split() %>% 
+          #setting dataframe names in list
+          set_names(c("conditional", "zi"))
+          
         
         #plotting model coefficients
-        (beta_plot <- beta_bs %>% 
-            filter(FE != "cond:(Intercept)",
-                   FE != "zi:(Intercept)") %>% 
-            ggplot + 
-            geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-            geom_vline(xintercept = 0, lty = "dashed") +
-            geom_text(aes(x = coef, y = FE, label = round(coef, 2),
-                          vjust = -.6, hjust = .3), size = 3) +
-            theme(legend.position = "none") +
-            labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-                 subtitle = "Poisson",
-                 y = "",
-                 x = "exp(\u03b2)"))
+        beta_plot_cond <- beta_bs[[1]] %>% 
+          dplyr::filter(FE != "cond:(Intercept)") %>% 
+          ggplot + 
+          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_vline(xintercept = 0.5, lty = "dashed") +
+          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
+                        vjust = -.6, hjust = .3), size = 3) +
+          theme(legend.position = "none") +
+          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
+               subtitle = "Binomial",
+               y = "",
+               x = "inv.logit(\u03b2)")
+        
+        beta_plot_zi <- beta_bs[[2]] %>% 
+          dplyr::filter(FE != "zi:(Intercept)") %>% 
+          ggplot + 
+          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_vline(xintercept = 0, lty = "dashed") +
+          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
+                        vjust = -.6, hjust = .3), size = 3) +
+          theme(legend.position = "none") +
+          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
+               subtitle = "Poisson",
+               y = "",
+               x = "exp(\u03b2)")
+        
+        #patching plots together
+        beta_plot <- beta_plot_cond + beta_plot_zi
       }
       
       ### negative binomial ----
       if(model$call$family == "nbinom2"){  
         beta_bs <- data.frame(FE = c(paste0("cond:", names(fixef(sim_model)$cond)), 
                                      paste0("zi:", names(fixef(sim_model)$zi))),
-                              coef = exp(c(fixef(sim_model)$cond, fixef(sim_model)$zi)),
-                              lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                              upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                              model = c(rep("conditional", length(fixef(sim_model)$cond)),
+                                        rep("zi", length(fixef(sim_model)$zi))), # column for the model type
+                              coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
+                              lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
+                              upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
+          #back-transforming CI bounds based on the model (con, zi)
+          mutate(lower = if_else(model == "conditional", plogis(lower), exp(lower)),
+                 upper = if_else(model == "conditional", plogis(upper), exp(upper))) %>% 
+          #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
+          group_by(model) %>% 
+          group_split() %>% 
+          #setting dataframe names in list
+          set_names(c("conditional", "zi"))
+        
         
         #plotting model coefficients
-        (beta_plot <- beta_bs %>% 
-            filter(FE != "cond:(Intercept)",
-                   FE != "zi:(Intercept)") %>% 
-            ggplot + 
-            geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-            geom_vline(xintercept = 0, lty = "dashed") +
-            geom_text(aes(x = coef, y = FE, label = round(coef, 2),
-                          vjust = -.6, hjust = .3), size = 3) +
-            theme(legend.position = "none") +
-            labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
-                 subtitle = "negative binomial",
-                 y = "",
-                 x = "exp(\u03b2)"))
+        beta_plot_cond <- beta_bs[[1]] %>% 
+          dplyr::filter(FE != "cond:(Intercept)") %>% 
+          ggplot + 
+          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_vline(xintercept = 0.5, lty = "dashed") +
+          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
+                        vjust = -.6, hjust = .3), size = 3) +
+          theme(legend.position = "none") +
+          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
+               subtitle = "Binomial",
+               y = "",
+               x = "inv.logit(\u03b2)")
+        
+        beta_plot_zi <- beta_bs[[2]] %>% 
+          dplyr::filter(FE != "zi:(Intercept)") %>% 
+          ggplot + 
+          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_vline(xintercept = 0, lty = "dashed") +
+          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
+                        vjust = -.6, hjust = .3), size = 3) +
+          theme(legend.position = "none") +
+          labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
+               subtitle = "Negative binomial",
+               y = "",
+               x = "exp(\u03b2)")
+        
+        #patching plots together
+        beta_plot <- beta_plot_cond + beta_plot_zi
       }
     }
     
@@ -218,7 +278,7 @@ boot_param_CI <- function(nsim, model, data){
         
         #plotting model coefficients
         (beta_plot <- beta_bs %>% 
-            filter(FE != "(Intercept)") %>% 
+            dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
             geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
             geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -241,7 +301,7 @@ boot_param_CI <- function(nsim, model, data){
         
         #plotting model coefficients
         (beta_plot <- beta_bs %>% 
-            filter(FE != "(Intercept)") %>% 
+            dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
             geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
             geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -266,7 +326,7 @@ boot_param_CI <- function(nsim, model, data){
         
         #plotting model coefficients
         (beta_plot <- beta_bs %>% 
-            filter(FE != "(Intercept)") %>% 
+            dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
             geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
             geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -277,7 +337,7 @@ boot_param_CI <- function(nsim, model, data){
             labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                  subtitle = "binomial",
                  y = "",
-                 x = "plogis(\u03b2)"))
+                 x = "inv.logit(\u03b2)"))
       }
     }
   }
