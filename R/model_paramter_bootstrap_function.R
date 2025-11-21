@@ -190,7 +190,7 @@ boot_param_CI <- function(nsim, model, data){
                x = "exp(\u03b2)")
         
         #patching plots together
-        beta_plot <- beta_plot_cond + beta_plot_zi
+        beta_plot <- beta_plot_cond / beta_plot_zi
       }
       
       ### negative binomial ----
@@ -243,7 +243,7 @@ boot_param_CI <- function(nsim, model, data){
                x = "exp(\u03b2)")
         
         #patching plots together
-        beta_plot <- beta_plot_cond + beta_plot_zi
+        beta_plot <- beta_plot_cond / beta_plot_zi
       }
     }
     
