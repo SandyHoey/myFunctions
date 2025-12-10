@@ -146,7 +146,7 @@ boot_param_CI <- function(nsim, model, data){
                                      names(fixef(sim_model)$zi)),
                               model = c(rep("conditional", length(fixef(sim_model)$cond)), # column for the model type
                                         rep("zi", length(fixef(sim_model)$zi))),
-                              coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
+                              coef = c(exp(fixef(sim_model)$cond), plogis(fixef(sim_model)$zi)),
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
           # back-transforming CI bounds based on the model (con, zi)
@@ -163,21 +163,8 @@ boot_param_CI <- function(nsim, model, data){
           
         
         # plotting model coefficients
+          # conditional model
         beta_plot_cond <- beta_bs[[1]] %>% 
-          dplyr::filter(FE != "(Intercept)") %>% 
-          ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-          geom_vline(xintercept = 0.5, lty = "dashed") +
-          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
-                        vjust = -.6, hjust = .3), size = 3) +
-          theme(legend.position = "none") +
-          labs(title = "Conditional model fixed effects",
-               subtitle = paste0("Poisson (iterations = ", n_fit, ")"),
-               y = "",
-               x = "inv.logit(\u03b2)")
-        
-        beta_plot_zi <- beta_bs[[2]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
@@ -186,10 +173,25 @@ boot_param_CI <- function(nsim, model, data){
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
+          labs(title = "Conditional model fixed effects",
+               subtitle = paste0("Poisson (iterations = ", n_fit, ")"),
+               y = "",
+               x = "exp(\u03b2)")
+        
+          # zero inflated model
+        beta_plot_zi <- beta_bs[[2]] %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
+          ggplot + 
+          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_vline(xintercept = 0.5, lty = "dashed") +
+          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
+                        vjust = -.6, hjust = .3), size = 3) +
+          theme(legend.position = "none") +
           labs(title = "Zero inflated model fixed effects",
                subtitle = paste0("Binomial (iterations = ", n_fit, ")"),
                y = "",
-               x = "exp(\u03b2)")
+               x = "inv.logit(\u03b2)")
         
         #patching plots together
         beta_plot <- beta_plot_cond / beta_plot_zi
@@ -201,7 +203,7 @@ boot_param_CI <- function(nsim, model, data){
                                      names(fixef(sim_model)$zi)),
                               model = c(rep("conditional", length(fixef(sim_model)$cond)), # column for the model type
                                         rep("zi", length(fixef(sim_model)$zi))), 
-                              coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
+                              coef = c(exp(fixef(sim_model)$cond), plogis(fixef(sim_model)$zi)),
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
           # back-transforming CI bounds based on the model (con, zi)
@@ -218,21 +220,8 @@ boot_param_CI <- function(nsim, model, data){
         
         
         # plotting model coefficients
+          # conditional model
         beta_plot_cond <- beta_bs[[1]] %>% 
-          dplyr::filter(FE != "(Intercept)") %>% 
-          ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-          geom_vline(xintercept = 0.5, lty = "dashed") +
-          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
-                        vjust = -.6, hjust = .3), size = 3) +
-          theme(legend.position = "none") +
-          labs(title = "Conditional model fixed effects",
-               subtitle = paste0("Negative binomial (iterations = ", n_fit, ")"),
-               y = "",
-               x = "inv.logit(\u03b2)")
-        
-        beta_plot_zi <- beta_bs[[2]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
@@ -241,10 +230,25 @@ boot_param_CI <- function(nsim, model, data){
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
+          labs(title = "Conditional model fixed effects",
+               subtitle = paste0("Negative binomial (iterations = ", n_fit, ")"),
+               y = "",
+               x = "exp(\u03b2)")
+        
+          # zero inflated model
+        beta_plot_zi <- beta_bs[[2]] %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
+          ggplot + 
+          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_vline(xintercept = 0.5, lty = "dashed") +
+          geom_text(aes(x = coef, y = FE, label = round(coef, 2),
+                        vjust = -.6, hjust = .3), size = 3) +
+          theme(legend.position = "none") +
           labs(title = "Zero inflated model fixed effects",
                subtitle = paste0("Binomial  (iterations = ", n_fit, ")"),
                y = "",
-               x = "exp(\u03b2)")
+               x = "inv.logit(\u03b2)")
         
         #patching plots together
         beta_plot <- beta_plot_cond / beta_plot_zi
