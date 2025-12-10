@@ -150,8 +150,8 @@ boot_param_CI <- function(nsim, model, data){
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
           #back-transforming CI bounds based on the model (con, zi)
-          mutate(lower = if_else(model == "conditional", plogis(lower), exp(lower)),
-                 upper = if_else(model == "conditional", plogis(upper), exp(upper))) %>% 
+          mutate(lower = if_else(model == "conditional", exp(lower), exp(lower)),
+                 upper = if_else(model == "zi", plogis(upper), plogis(upper))) %>% 
           #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
           group_split()
@@ -162,7 +162,7 @@ boot_param_CI <- function(nsim, model, data){
         
         #plotting model coefficients
         beta_plot_cond <- beta_bs[[1]] %>% 
-          dplyr::filter(FE != "cond:(Intercept)") %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -176,7 +176,7 @@ boot_param_CI <- function(nsim, model, data){
                x = "inv.logit(\u03b2)")
         
         beta_plot_zi <- beta_bs[[2]] %>% 
-          dplyr::filter(FE != "zi:(Intercept)") %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -203,8 +203,8 @@ boot_param_CI <- function(nsim, model, data){
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
           #back-transforming CI bounds based on the model (con, zi)
-          mutate(lower = if_else(model == "conditional", plogis(lower), exp(lower)),
-                 upper = if_else(model == "conditional", plogis(upper), exp(upper))) %>% 
+          mutate(lower = if_else(model == "conditional", exp(lower), exp(lower)),
+                 upper = if_else(model == "zi", plogis(upper), plogis(upper))) %>% 
           #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
           group_split()
@@ -215,7 +215,7 @@ boot_param_CI <- function(nsim, model, data){
         
         #plotting model coefficients
         beta_plot_cond <- beta_bs[[1]] %>% 
-          dplyr::filter(FE != "cond:(Intercept)") %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
@@ -229,7 +229,7 @@ boot_param_CI <- function(nsim, model, data){
                x = "inv.logit(\u03b2)")
         
         beta_plot_zi <- beta_bs[[2]] %>% 
-          dplyr::filter(FE != "zi:(Intercept)") %>% 
+          dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
