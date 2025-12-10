@@ -20,22 +20,22 @@ boot_param_CI <- function(nsim, model, data){
   # lme4 --------------------------------------------------------------------
   ## code for lme4 models
   if(inherits(model, "merMod")){
-    #bootstrapping parameter values from model simulations
+     #bootstrapping parameter values from model simulations
     betas <- matrix(NA, nrow = nsim,
                     ncol = length(fixef(model)))
     
     for(j in 1:nsim){
       sim_data <- data %>% 
-        mutate(y = unlist(simulate(model)))  #simulate response variables from the model
+        mutate(y = unlist(simulate(model)))  # simulate response variables from the model
       
-      sim_model <- update(model, y ~ ., data = sim_data) #rerun the model with the simulated values as the response
+      sim_model <- update(model, y ~ ., data = sim_data) # rerun the model with the simulated values as the response
       
-      if(is.null(summary(sim_model)$optinfo$conv$lme4$messages) == TRUE){ #if there are no warning messages (model fit fine) then record the parameters
+      if(is.null(summary(sim_model)$optinfo$conv$lme4$messages) == TRUE){ # if there are no warning messages (model fit fine) then record the parameters
         betas[j,] <- fixef(sim_model)
       }
     }
     
-    #seeing how many models fit well
+    # seeing how many models fit well
     n_fit <- betas %>% 
       na.omit %>% 
       nrow()
@@ -47,7 +47,7 @@ boot_param_CI <- function(nsim, model, data){
                             lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
                             upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
       
-      #plotting model coefficients
+      # plotting model coefficients
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -70,7 +70,7 @@ boot_param_CI <- function(nsim, model, data){
                             lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
                             upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
       
-      #plotting model coefficients
+      # plotting model coefficients
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -95,7 +95,7 @@ boot_param_CI <- function(nsim, model, data){
                             upper = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
       
       
-      #plotting model coefficients
+      # plotting model coefficients
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -119,23 +119,23 @@ boot_param_CI <- function(nsim, model, data){
     
     ## zero inflated ----
     if(length(fixef(model)$zi) != 0){
-      #bootstrapping parameter values from model simulations
+      # bootstrapping parameter values from model simulations
       betas <- matrix(NA, nrow = nsim,
                       ncol = length(fixef(model)$cond) + length(fixef(model)$zi))
       
       for(j in 1:nsim){
         sim_data <- data %>% 
-          mutate(y = unlist(simulate(model)))  #simulate response variables from the model
+          mutate(y = unlist(simulate(model)))  # simulate response variables from the model
         
         sim_model <- update(model, y ~ ., data = sim_data) #rerun the model with the simulated values as the response
         
         if(sim_model$fit$convergence == 0 &
-           sim_model$sdr$pdHess){ #if model convergence looks good then record the parameters
+           sim_model$sdr$pdHess){ # if model convergence looks good then record the parameters
           betas[j,] <- c(fixef(sim_model)$cond, fixef(sim_model)$zi)
         }
       }
       
-      #seeing how many models fit well
+      # seeing how many models fit well
       n_fit <- betas %>% 
         na.omit %>% 
         nrow()
@@ -144,23 +144,25 @@ boot_param_CI <- function(nsim, model, data){
       if(model$call$family == "poisson"){  
         beta_bs <- data.frame(FE = c(names(fixef(sim_model)$cond), 
                                      names(fixef(sim_model)$zi)),
-                              model = c(rep("conditional", length(fixef(sim_model)$cond)),
-                                        rep("zi", length(fixef(sim_model)$zi))), # column for the model type
+                              model = c(rep("conditional", length(fixef(sim_model)$cond)), # column for the model type
+                                        rep("zi", length(fixef(sim_model)$zi))),
                               coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
-          #back-transforming CI bounds based on the model (con, zi)
-          mutate(lower = if_else(model == "conditional", exp(lower), exp(lower)),
-                 upper = if_else(model == "zi", plogis(upper), plogis(upper))) %>% 
-          #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
+          # back-transforming CI bounds based on the model (con, zi)
+          # if the model type is conditional (poisson), the link funciton is log() and is back-transformed with exp()
+          # otherwise the model type is zero-inflated (binomial), the link function is logit() and is back-transformed with plogis()
+          mutate(lower = if_else(model == "conditional", exp(lower), plogis(lower)),
+                 upper = if_else(model == "conditional", exp(upper), plogis(upper))) %>% 
+          # turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
           group_split()
         
-        #setting dataframe names in list
+        # setting dataframe names in list
         names(beta_bs) <- c("conditional", "zi")
           
         
-        #plotting model coefficients
+        # plotting model coefficients
         beta_plot_cond <- beta_bs[[1]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -171,7 +173,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Conditional model fixed effects",
-               subtitle = paste0("Binomial  (iterations = ", n_fit, ")"),
+               subtitle = paste0("Poisson (iterations = ", n_fit, ")"),
                y = "",
                x = "inv.logit(\u03b2)")
         
@@ -185,7 +187,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Zero inflated model fixed effects",
-               subtitle = paste0("Poisson  (iterations = ", n_fit, ")"),
+               subtitle = paste0("Binomial (iterations = ", n_fit, ")"),
                y = "",
                x = "exp(\u03b2)")
         
@@ -197,23 +199,25 @@ boot_param_CI <- function(nsim, model, data){
       if(model$call$family == "nbinom2"){  
         beta_bs <- data.frame(FE = c(names(fixef(sim_model)$cond), 
                                      names(fixef(sim_model)$zi)),
-                              model = c(rep("conditional", length(fixef(sim_model)$cond)),
-                                        rep("zi", length(fixef(sim_model)$zi))), # column for the model type
+                              model = c(rep("conditional", length(fixef(sim_model)$cond)), # column for the model type
+                                        rep("zi", length(fixef(sim_model)$zi))), 
                               coef = c(plogis(fixef(sim_model)$cond), exp(fixef(sim_model)$zi)),
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
-          #back-transforming CI bounds based on the model (con, zi)
-          mutate(lower = if_else(model == "conditional", exp(lower), exp(lower)),
-                 upper = if_else(model == "zi", plogis(upper), plogis(upper))) %>% 
-          #turning into a list with a dataframe for each model part (cond, zi) so they plot separately
+          # back-transforming CI bounds based on the model (con, zi)
+          # if the model type is conditional (negative binomial), the link funciton is log() and is back-transformed with exp()
+          # otherwise the model type is zero-inflated (binomial), the link function is logit() and is back-transformed with plogis()
+          mutate(lower = if_else(model == "conditional", exp(lower), plogis(lower)),
+                 upper = if_else(model == "conditional", exp(upper), plogis(upper))) %>% 
+          # turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
           group_split()
         
-        #setting dataframe names in list
+        # setting dataframe names in list
         names(beta_bs) <- c("conditional", "zi")
         
         
-        #plotting model coefficients
+        # plotting model coefficients
         beta_plot_cond <- beta_bs[[1]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -224,7 +228,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Conditional model fixed effects",
-               subtitle = paste0("Binomial  (iterations = ", n_fit, ")"),
+               subtitle = paste0("Negative binomial (iterations = ", n_fit, ")"),
                y = "",
                x = "inv.logit(\u03b2)")
         
@@ -238,7 +242,7 @@ boot_param_CI <- function(nsim, model, data){
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Zero inflated model fixed effects",
-               subtitle = paste0("Negative binomial  (iterations = ", n_fit, ")"),
+               subtitle = paste0("Binomial  (iterations = ", n_fit, ")"),
                y = "",
                x = "exp(\u03b2)")
         
@@ -249,23 +253,23 @@ boot_param_CI <- function(nsim, model, data){
     
     ## non-zero inflated models ----
     if(length(fixef(model)$zi) == 0){
-      #bootstrapping parameter values from model simulations
+      # bootstrapping parameter values from model simulations
       betas <- matrix(NA, nrow = nsim,
                       ncol = length(fixef(model)$cond))
       
       for(j in 1:nsim){
         sim_data <- data %>% 
-          mutate(y = unlist(simulate(model)))  #simulate response variables from the model
+          mutate(y = unlist(simulate(model)))  # simulate response variables from the model
         
-        sim_model <- update(model, y ~ ., data = sim_data) #rerun the model with the simulated values as the response
+        sim_model <- update(model, y ~ ., data = sim_data) # rerun the model with the simulated values as the response
         
         if(sim_model$fit$convergence == 0 &
-           sim_model$sdr$pdHess){ #if there are no warning messages (model fit fine) then record the parameters
+           sim_model$sdr$pdHess){ # if there are no warning messages (model fit fine) then record the parameters
           betas[j,] <- fixef(sim_model)$cond
         }
       }
       
-      #seeing how many models fit well
+      # seeing how many models fit well
       n_fit <- betas %>% 
         na.omit %>% 
         nrow()
@@ -277,7 +281,7 @@ boot_param_CI <- function(nsim, model, data){
                               lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
                               upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
-        #plotting model coefficients
+        # plotting model coefficients
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
@@ -300,7 +304,7 @@ boot_param_CI <- function(nsim, model, data){
                               lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
                               upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
-        #plotting model coefficients
+        # plotting model coefficients
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
@@ -325,7 +329,7 @@ boot_param_CI <- function(nsim, model, data){
                               upper = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
         
-        #plotting model coefficients
+        # plotting model coefficients
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
