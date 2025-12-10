@@ -1,6 +1,6 @@
 Package: myFunctions
 Title: Custom Functions
-Version: 0.0.0.9000
+Version: 0.0.1.0000
 Authors@R: 
     person("Cameron", "Ho", , "cho21@uw.edu", role = c("aut", "cre"))
 Description: This package contains random functions that I create for my own use. 
