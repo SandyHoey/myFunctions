@@ -142,11 +142,11 @@ boot_param_CI <- function(nsim, model, data){
       
       ### Poisson ----
       if(model$call$family == "poisson"){  
-        beta_bs <- data.frame(FE = c(names(fixef(sim_model)$cond), 
-                                     names(fixef(sim_model)$zi)),
-                              model = c(rep("conditional", length(fixef(sim_model)$cond)), # column for the model type
-                                        rep("zi", length(fixef(sim_model)$zi))),
-                              coef = c(exp(fixef(sim_model)$cond), plogis(fixef(sim_model)$zi)),
+        beta_bs <- data.frame(FE = c(names(fixef(model)$cond), 
+                                     names(fixef(model)$zi)),
+                              model = c(rep("conditional", length(fixef(model)$cond)), # column for the model type
+                                        rep("zi", length(fixef(model)$zi))),
+                              coef = c(exp(fixef(model)$cond), plogis(fixef(model)$zi)),
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
           # back-transforming CI bounds based on the model (con, zi)
@@ -199,11 +199,11 @@ boot_param_CI <- function(nsim, model, data){
       
       ### negative binomial ----
       if(model$call$family == "nbinom2"){  
-        beta_bs <- data.frame(FE = c(names(fixef(sim_model)$cond), 
-                                     names(fixef(sim_model)$zi)),
-                              model = c(rep("conditional", length(fixef(sim_model)$cond)), # column for the model type
+        beta_bs <- data.frame(FE = c(names(fixef(model)$cond), 
+                                     names(fixef(model)$zi)),
+                              model = c(rep("conditional", length(fixef(model)$cond)), # column for the model type
                                         rep("zi", length(fixef(sim_model)$zi))), 
-                              coef = c(exp(fixef(sim_model)$cond), plogis(fixef(sim_model)$zi)),
+                              coef = c(exp(fixef(model)$cond), plogis(fixef(model)$zi)),
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
           # back-transforming CI bounds based on the model (con, zi)
@@ -280,8 +280,8 @@ boot_param_CI <- function(nsim, model, data){
       
       ### Poisson ----
       if(model$call$family == "poisson"){  
-        beta_bs <- data.frame(FE = names(fixef(sim_model)$cond),
-                              coef = exp(fixef(sim_model)$cond),
+        beta_bs <- data.frame(FE = names(fixef(model)$cond),
+                              coef = exp(fixef(model)$cond),
                               lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
                               upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
@@ -303,8 +303,8 @@ boot_param_CI <- function(nsim, model, data){
       
       ### negative binomial ----
       if(model$call$family == "nbinom2"){  
-        beta_bs <- data.frame(FE = names(fixef(sim_model)$cond),
-                              coef = exp(fixef(sim_model)$cond),
+        beta_bs <- data.frame(FE = names(fixef(model)$cond),
+                              coef = exp(fixef(model)$cond),
                               lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
                               upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
@@ -327,8 +327,8 @@ boot_param_CI <- function(nsim, model, data){
       ### binomial ----
       if(model$call$family == "binomial"){  
         
-        beta_bs <- data.frame(FE = names(fixef(sim_model)$cond),
-                              coef = plogis(fixef(sim_model)$cond),
+        beta_bs <- data.frame(FE = names(fixef(model)$cond),
+                              coef = plogis(fixef(model)$cond),
                               lower = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
                               upper = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
         
