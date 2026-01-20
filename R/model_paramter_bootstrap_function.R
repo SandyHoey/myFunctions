@@ -118,6 +118,8 @@ boot_param_CI <- function(nsim, model, data){
   if(inherits(model, "glmmTMB")){
     
     ## zero inflated ----
+    # conditional model is the count 
+    # zero-inflated model is the binomial
     if(length(fixef(model)$zi) != 0){
       # bootstrapping parameter values from model simulations
       betas <- matrix(NA, nrow = nsim,
