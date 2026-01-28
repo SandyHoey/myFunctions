@@ -3,26 +3,40 @@
 #' @param nsim number of iteration for the bootstrap
 #' @param model lme4 (merMod) or glmmTMB model object
 #' @param data dataframe used in the model
+#' @param newData dataframe used for model predictions
 #' @return returns model parameters for all bootstrap iterations and 95% confidence interval plots and dataframe 
 #' @export
 #' @import stats
 #' @import dplyr
+#' @import lme4
 #' @import ggplot2
 #' @import patchwork
 #' @importFrom dplyr filter
-#' @importFrom lme4 fixef
 #' @importFrom data.table %like%
 
 
 #defining function
-boot_param_CI <- function(nsim, model, data){
+boot_param_CI <- function(nsim, model, data, newData = NULL){
+
   
   # lme4 --------------------------------------------------------------------
   ## code for lme4 models
   if(inherits(model, "merMod")){
-     #bootstrapping parameter values from model simulations
+    #bootstrapping parameter values from model simulations
     betas <- matrix(NA, nrow = nsim,
                     ncol = length(fixef(model)))
+    
+    # preparing for model predictions
+    if(!is.null(newData)){
+      # creating a data frame to put predicted values form each iteration
+      pv <- matrix(NA, nrow = nsim,
+                   ncol = nrow(newData))
+      
+      # getting the sd for the random effect if there is one
+      # if this is not created, there is no random effect
+      re <- as.data.frame(VarCorr(model))$sdcor
+    }
+    
     
     for(j in 1:nsim){
       sim_data <- data %>% 
@@ -32,6 +46,15 @@ boot_param_CI <- function(nsim, model, data){
       
       if(is.null(summary(sim_model)$optinfo$conv$lme4$messages) == TRUE){ # if there are no warning messages (model fit fine) then record the parameters
         betas[j,] <- fixef(sim_model)
+        
+        # doing model prediction if new data is provided
+        if(!is.null(newData)){
+          # if there is no random effect
+          if(missing(re)){
+            pv[j,] <- predict(sim_model, newData, re.form = NA)
+            
+          } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
+        }
       }
     }
     
@@ -61,6 +84,13 @@ boot_param_CI <- function(nsim, model, data){
                subtitle = "Poisson",
                y = "",
                x = "exp(\u03b2)"))
+      
+      if(!is.null(newData)){
+        # calculating and backtransforming prediciton and prediction interval
+        newData$mean <- exp(apply(pv, 2, function(x)mean(x,na.rm = TRUE)))
+        newData$lower <- exp(apply(pv, 2, function(x)quantile(x,p = 0.025, na.rm = TRUE)))
+        newData$upper <- exp(apply(pv, 2, function(x)quantile(x,p = 0.975, na.rm = TRUE)))
+      }
     }
     
     ## negative binomial ----
@@ -84,6 +114,13 @@ boot_param_CI <- function(nsim, model, data){
                subtitle = "negative binomial",
                y = "",
                x = "exp(\u03b2)"))
+      
+      if(!is.null(newData)){
+        # calculating and backtransforming prediciton and prediction interval
+        newData$mean <- exp(apply(pv, 2, function(x)mean(x,na.rm = TRUE)))
+        newData$lower <- exp(apply(pv, 2, function(x)quantile(x,p = 0.025, na.rm = TRUE)))
+        newData$upper <- exp(apply(pv, 2, function(x)quantile(x,p = 0.975, na.rm = TRUE)))
+      }
     }
     
     ## binomial ----
@@ -109,6 +146,13 @@ boot_param_CI <- function(nsim, model, data){
                subtitle = "binomial",
                y = "",
                x = "inv.logit(\u03b2)"))
+      
+      if(!is.null(newData)){
+        # calculating and backtransforming prediciton and prediction interval
+        newData$mean <- plogis(apply(pv, 2, function(x)mean(x,na.rm = TRUE)))
+        newData$lower <- plogis(apply(pv, 2, function(x)quantile(x,p = 0.025, na.rm = TRUE)))
+        newData$upper <- plogis(apply(pv, 2, function(x)quantile(x,p = 0.975, na.rm = TRUE)))
+      }
     }
   }
   
@@ -131,9 +175,18 @@ boot_param_CI <- function(nsim, model, data){
         
         sim_model <- update(model, y ~ ., data = sim_data) #rerun the model with the simulated values as the response
         
-        if(sim_model$fit$convergence == 0 &
-           sim_model$sdr$pdHess){ # if model convergence looks good then record the parameters
+        if(sim_model$fit$convergence == 0 & sim_model$sdr$pdHess){ 
+          # if model convergence looks good then record the parameters
           betas[j,] <- c(fixef(sim_model)$cond, fixef(sim_model)$zi)
+          
+          # doing model prediction if new data is provided
+          if(!is.null(newData)){
+            # if there is no random effect
+            if(missing(re)){
+              pv[j,] <- predict(sim_model, newData, re.form = NA)
+              
+            } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
+          }
         }
       }
       
@@ -162,10 +215,10 @@ boot_param_CI <- function(nsim, model, data){
         
         # setting dataframe names in list
         names(beta_bs) <- c("conditional", "zi")
-          
+        
         
         # plotting model coefficients
-          # conditional model
+        # conditional model
         beta_plot_cond <- beta_bs[[1]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -180,7 +233,7 @@ boot_param_CI <- function(nsim, model, data){
                y = "",
                x = "exp(\u03b2)")
         
-          # zero inflated model
+        # zero inflated model
         beta_plot_zi <- beta_bs[[2]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -222,7 +275,7 @@ boot_param_CI <- function(nsim, model, data){
         
         
         # plotting model coefficients
-          # conditional model
+        # conditional model
         beta_plot_cond <- beta_bs[[1]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -237,7 +290,7 @@ boot_param_CI <- function(nsim, model, data){
                y = "",
                x = "exp(\u03b2)")
         
-          # zero inflated model
+        # zero inflated model
         beta_plot_zi <- beta_bs[[2]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
@@ -354,7 +407,9 @@ boot_param_CI <- function(nsim, model, data){
   }
   
   
-  
-  return(list(betas, beta_bs, beta_plot))
+  if(!is.null(newData)){
+    return(list(betas, beta_bs, beta_plot, newData))
+  } else(  return(list(betas, beta_bs, beta_plot))
+)
 }
 

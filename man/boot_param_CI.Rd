@@ -4,7 +4,7 @@
 \alias{boot_param_CI}
 \title{Bootstrapping confidence intervals for lme4 and glmmTMB}
 \usage{
-boot_param_CI(nsim, model, data)
+boot_param_CI(nsim, model, data, newData = NULL)
 }
 \arguments{
 \item{nsim}{number of iteration for the bootstrap}
@@ -12,6 +12,8 @@ boot_param_CI(nsim, model, data)
 \item{model}{lme4 (merMod) or glmmTMB model object}
 
 \item{data}{dataframe used in the model}
+
+\item{newData}{dataframe used for model predictions}
 }
 \value{
 returns model parameters for all bootstrap iterations and 95\% confidence interval plots and dataframe
