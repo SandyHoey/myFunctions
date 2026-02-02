@@ -74,8 +74,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
           geom_vline(xintercept = 0, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
@@ -104,8 +104,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
           geom_vline(xintercept = 0, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
@@ -136,8 +136,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
           geom_vline(xintercept = 0.5, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
@@ -222,8 +222,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
         beta_plot_cond <- beta_bs[[1]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
           geom_vline(xintercept = 0, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
@@ -237,8 +237,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
         beta_plot_zi <- beta_bs[[2]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
           geom_vline(xintercept = 0.5, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
@@ -279,8 +279,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
         beta_plot_cond <- beta_bs[[1]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
           geom_vline(xintercept = 0, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
@@ -294,8 +294,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
         beta_plot_zi <- beta_bs[[2]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
-          geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
           geom_vline(xintercept = 0.5, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
@@ -344,8 +344,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
-            geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+            geom_point(aes(x = coef, y = FE)) +
+            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
             geom_vline(xintercept = 0, lty = "dashed") +
             geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                           vjust = -.6, hjust = .3), size = 3) +
@@ -367,8 +367,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
-            geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+            geom_point(aes(x = coef, y = FE)) +
+            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
             geom_vline(xintercept = 0, lty = "dashed") +
             geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                           vjust = -.6, hjust = .3), size = 3) +
@@ -392,8 +392,8 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
-            geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
-            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+            geom_point(aes(x = coef, y = FE)) +
+            geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
             geom_vline(xintercept = 0.5, lty = "dashed") +
             geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                           vjust = -.6, hjust = .3), size = 3) +
@@ -405,7 +405,9 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
       }
     }
   }
-  
+  +
+    geom_point(aes(color = yvar < 0.5)) +
+    scale_color_manual(values = c("#DC3220", "#006CD1"))
   
   if(!is.null(newData)){
     return(list(betas, beta_bs, beta_plot, newData))
