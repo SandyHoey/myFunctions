@@ -4,6 +4,7 @@
 #' @param model lme4 (merMod) or glmmTMB model object
 #' @param data dataframe used in the model
 #' @param newData dataframe used for model predictions
+#' @param pred_CI if confidence intervals should be calculated for the model predictions (instead of prediction intervals)
 #' @return returns model parameters for all bootstrap iterations and 95% confidence interval plots and dataframe 
 #' @export
 #' @import stats
@@ -16,7 +17,7 @@
 
 
 #defining function
-boot_param_CI <- function(nsim, model, data, newData = NULL){
+boot_param_CI <- function(nsim, model, data, newData = NULL, pred_CI = FALSE){
 
   
   # lme4 --------------------------------------------------------------------
@@ -53,7 +54,10 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
           if(missing(re)){
             pv[j,] <- predict(sim_model, newData, re.form = NA)
             
-          } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
+          } else if(pred_ci == TRUE){ # if user wants to use CI instead of PI
+            pv[j,] <- predict(sim_model, newData, re.form = NA)
+          
+            } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
         }
       }
     }
@@ -89,7 +93,7 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
                x = "\u03b2"))
       
       if(!is.null(newData)){
-        # calculating and backtransforming prediciton and prediction interval
+        # calculating and back-transforming prediction and  interval
         newData$mean <- exp(apply(pv, 2, function(x)mean(x,na.rm = TRUE)))
         newData$lower <- exp(apply(pv, 2, function(x)quantile(x,p = 0.025, na.rm = TRUE)))
         newData$upper <- exp(apply(pv, 2, function(x)quantile(x,p = 0.975, na.rm = TRUE)))
@@ -122,7 +126,7 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
                x = "\u03b2"))
       
       if(!is.null(newData)){
-        # calculating and backtransforming prediciton and prediction interval
+        # calculating and back-transforming prediction and prediction interval
         newData$mean <- exp(apply(pv, 2, function(x)mean(x,na.rm = TRUE)))
         newData$lower <- exp(apply(pv, 2, function(x)quantile(x,p = 0.025, na.rm = TRUE)))
         newData$upper <- exp(apply(pv, 2, function(x)quantile(x,p = 0.975, na.rm = TRUE)))
@@ -157,7 +161,7 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
                x = "\u03b2"))
       
       if(!is.null(newData)){
-        # calculating and backtransforming prediciton and prediction interval
+        # calculating and back-transforming prediction and prediction interval
         newData$mean <- plogis(apply(pv, 2, function(x)mean(x,na.rm = TRUE)))
         newData$lower <- plogis(apply(pv, 2, function(x)quantile(x,p = 0.025, na.rm = TRUE)))
         newData$upper <- plogis(apply(pv, 2, function(x)quantile(x,p = 0.975, na.rm = TRUE)))
@@ -194,7 +198,10 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
             if(missing(re)){
               pv[j,] <- predict(sim_model, newData, re.form = NA)
               
-            } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
+            } else if(pred_ci == TRUE){ # if user wants to use CI instead of PI
+              pv[j,] <- predict(sim_model, newData, re.form = NA)
+              
+              } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
           }
         }
       }
