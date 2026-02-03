@@ -66,24 +66,27 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
     ## Poisson ----
     if(model@call$family == "poisson"){  
       beta_bs <- data.frame(FE = names(fixef(model)),
-                            coef = exp(fixef(model)),
-                            lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                            upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                            coef = fixef(model),
+                            lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)), #CI lower bound
+                            upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) #CI upper bound
       
       # plotting model coefficients
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          # creating dashed line around 0
           geom_vline(xintercept = 0, lty = "dashed") +
+          # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                subtitle = "Poisson",
                y = "",
-               x = "exp(\u03b2)"))
+               x = "\u03b2"))
       
       if(!is.null(newData)){
         # calculating and backtransforming prediciton and prediction interval
@@ -96,24 +99,27 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
     ## negative binomial ----
     if(any(model@call$family %like% "negative.binomial")){  
       beta_bs <- data.frame(FE = names(fixef(model)),
-                            coef = exp(fixef(model)),
-                            lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                            upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                            coef = fixef(model),
+                            lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)), #CI lower bound
+                            upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) #CI upper bound
       
       # plotting model coefficients
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          # creating dashed line around 0
           geom_vline(xintercept = 0, lty = "dashed") +
+          # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                subtitle = "negative binomial",
                y = "",
-               x = "exp(\u03b2)"))
+               x = "\u03b2"))
       
       if(!is.null(newData)){
         # calculating and backtransforming prediciton and prediction interval
@@ -127,9 +133,9 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
     if(model@call$family == "binomial"){  
       
       beta_bs <- data.frame(FE = names(fixef(model)),
-                            coef = plogis(fixef(model)),
-                            lower = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                            upper = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                            coef = fixef(model),
+                            lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)), #CI lower bound
+                            upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) #CI upper bound
       
       
       # plotting model coefficients
@@ -137,15 +143,18 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-          geom_vline(xintercept = 0.5, lty = "dashed") +
+          # creating dashed line around 0
+          geom_vline(xintercept = 0, lty = "dashed") +
+          # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                subtitle = "binomial",
                y = "",
-               x = "inv.logit(\u03b2)"))
+               x = "\u03b2"))
       
       if(!is.null(newData)){
         # calculating and backtransforming prediciton and prediction interval
@@ -201,14 +210,9 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
                                      names(fixef(model)$zi)),
                               model = c(rep("conditional", length(fixef(model)$cond)), # column for the model type
                                         rep("zi", length(fixef(model)$zi))),
-                              coef = c(exp(fixef(model)$cond), plogis(fixef(model)$zi)),
-                              lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
-                              upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
-          # back-transforming CI bounds based on the model (con, zi)
-          # if the model type is conditional (poisson), the link funciton is log() and is back-transformed with exp()
-          # otherwise the model type is zero-inflated (binomial), the link function is logit() and is back-transformed with plogis()
-          mutate(lower = if_else(model == "conditional", exp(lower), plogis(lower)),
-                 upper = if_else(model == "conditional", exp(upper), plogis(upper))) %>% 
+                              coef = c(fixef(model)$cond, fixef(model)$zi),
+                              lower = betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T),      #CI lower bound
+                              upper = betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)) %>%  #CI upper bound 
           # turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
           group_split()
@@ -223,15 +227,18 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          # creating dashed line at 0
           geom_vline(xintercept = 0, lty = "dashed") +
+          # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Conditional model fixed effects",
                subtitle = paste0("Poisson (iterations = ", n_fit, ")"),
                y = "",
-               x = "exp(\u03b2)")
+               x = "\u03b2")
         
         # zero inflated model
         beta_plot_zi <- beta_bs[[2]] %>% 
@@ -239,14 +246,14 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-          geom_vline(xintercept = 0.5, lty = "dashed") +
+          geom_vline(xintercept = 0, lty = "dashed") +
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Zero inflated model fixed effects",
                subtitle = paste0("Binomial (iterations = ", n_fit, ")"),
                y = "",
-               x = "inv.logit(\u03b2)")
+               x = "\u03b2")
         
         #patching plots together
         beta_plot <- beta_plot_cond / beta_plot_zi
@@ -258,14 +265,9 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
                                      names(fixef(model)$zi)),
                               model = c(rep("conditional", length(fixef(model)$cond)), # column for the model type
                                         rep("zi", length(fixef(sim_model)$zi))), 
-                              coef = c(exp(fixef(model)$cond), plogis(fixef(model)$zi)),
+                              coef = c(fixef(model)$cond, fixef(model)$z),
                               lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)),      #CI lower bound
                               upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) %>%  #CI upper bound 
-          # back-transforming CI bounds based on the model (con, zi)
-          # if the model type is conditional (negative binomial), the link funciton is log() and is back-transformed with exp()
-          # otherwise the model type is zero-inflated (binomial), the link function is logit() and is back-transformed with plogis()
-          mutate(lower = if_else(model == "conditional", exp(lower), plogis(lower)),
-                 upper = if_else(model == "conditional", exp(upper), plogis(upper))) %>% 
           # turning into a list with a dataframe for each model part (cond, zi) so they plot separately
           group_by(model) %>% 
           group_split()
@@ -280,30 +282,36 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          # creating dashed line at 0
           geom_vline(xintercept = 0, lty = "dashed") +
+          # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Conditional model fixed effects",
                subtitle = paste0("Negative binomial (iterations = ", n_fit, ")"),
                y = "",
-               x = "exp(\u03b2)")
+               x = "\u03b2")
         
         # zero inflated model
         beta_plot_zi <- beta_bs[[2]] %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-          geom_vline(xintercept = 0.5, lty = "dashed") +
+          # creating dashed line at 0
+          geom_vline(xintercept = 0, lty = "dashed") +
+          # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
           labs(title = "Zero inflated model fixed effects",
                subtitle = paste0("Binomial  (iterations = ", n_fit, ")"),
                y = "",
-               x = "inv.logit(\u03b2)")
+               x = "\u03b2")
         
         #patching plots together
         beta_plot <- beta_plot_cond / beta_plot_zi
@@ -336,56 +344,62 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
       ### Poisson ----
       if(model$call$family == "poisson"){  
         beta_bs <- data.frame(FE = names(fixef(model)$cond),
-                              coef = exp(fixef(model)$cond),
-                              lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                              upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                              coef = fixef(model)$cond,
+                              lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)), #CI lower bound
+                              upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) #CI upper bound
         
         # plotting model coefficients
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
             geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+            # confidence intervals
             geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+            # creating dashed line at 0
             geom_vline(xintercept = 0, lty = "dashed") +
+            # adding model coefficient value to plot
             geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                           vjust = -.6, hjust = .3), size = 3) +
             theme(legend.position = "none") +
             labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                  subtitle = "Poisson",
                  y = "",
-                 x = "exp(\u03b2)"))
+                 x = "\u03b2"))
       }
       
       ### negative binomial ----
       if(model$call$family == "nbinom2"){  
         beta_bs <- data.frame(FE = names(fixef(model)$cond),
-                              coef = exp(fixef(model)$cond),
-                              lower = exp(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                              upper = exp(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                              coef = fixef(model)$cond,
+                              lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)), #CI lower bound
+                              upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) #CI upper bound
         
         # plotting model coefficients
         (beta_plot <- beta_bs %>% 
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
             geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+            # confidence intervals
             geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+            # creating dashed line at 0
             geom_vline(xintercept = 0, lty = "dashed") +
+            # adding model coefficient value to plot
             geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                           vjust = -.6, hjust = .3), size = 3) +
             theme(legend.position = "none") +
             labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                  subtitle = "negative binomial",
                  y = "",
-                 x = "exp(\u03b2)"))
+                 x = "\u03b2"))
       }
       
       ### binomial ----
       if(model$call$family == "binomial"){  
         
         beta_bs <- data.frame(FE = names(fixef(model)$cond),
-                              coef = plogis(fixef(model)$cond),
-                              lower = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T))), #CI lower bound
-                              upper = plogis(apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T)))) #CI upper bound
+                              coef = fixef(model)$cond,
+                              lower = apply(betas, 2, function(x) quantile(x, probs = 0.025, na.rm = T)), #CI lower bound
+                              upper = apply(betas, 2, function(x) quantile(x, probs = 0.975, na.rm = T))) #CI upper bound
         
         
         # plotting model coefficients
@@ -393,15 +407,18 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
             dplyr::filter(FE != "(Intercept)") %>% 
             ggplot + 
             geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+            # confidence intervals
             geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
-            geom_vline(xintercept = 0.5, lty = "dashed") +
+            # creating dashed line at 0
+            geom_vline(xintercept = 0, lty = "dashed") +
+            # adding model coefficient value to plot
             geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                           vjust = -.6, hjust = .3), size = 3) +
             theme(legend.position = "none") +
             labs(title = paste0("fixed effects (iterations = ", n_fit, ")"),
                  subtitle = "binomial",
                  y = "",
-                 x = "inv.logit(\u03b2)"))
+                 x = "\u03b2"))
       }
     }
   }
