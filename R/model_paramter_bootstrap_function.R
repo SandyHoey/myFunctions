@@ -54,7 +54,7 @@ boot_param_CI <- function(nsim, model, data, newData = NULL, pred_CI = FALSE){
           if(missing(re)){
             pv[j,] <- predict(sim_model, newData, re.form = NA)
             
-          } else if(pred_ci == TRUE){ # if user wants to use CI instead of PI
+          } else if(pred_CI == TRUE){ # if user wants to use CI instead of PI
             pv[j,] <- predict(sim_model, newData, re.form = NA)
           
             } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
@@ -198,7 +198,7 @@ boot_param_CI <- function(nsim, model, data, newData = NULL, pred_CI = FALSE){
             if(missing(re)){
               pv[j,] <- predict(sim_model, newData, re.form = NA)
               
-            } else if(pred_ci == TRUE){ # if user wants to use CI instead of PI
+            } else if(pred_CI == TRUE){ # if user wants to use CI instead of PI
               pv[j,] <- predict(sim_model, newData, re.form = NA)
               
               } else(pv[j,] <- predict(sim_model, newData, re.form = NA) + rnorm(1, 0, sd = re))
