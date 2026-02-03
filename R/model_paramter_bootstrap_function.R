@@ -78,10 +78,15 @@ boot_param_CI <- function(nsim, model, data, newData = NULL, pred_CI = FALSE){
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
+<<<<<<< HEAD
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
           # creating dashed line around 0
+=======
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
+>>>>>>> de026704c022feab095e36762226d2acbdaa6c47
           geom_vline(xintercept = 0, lty = "dashed") +
           # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
@@ -111,10 +116,15 @@ boot_param_CI <- function(nsim, model, data, newData = NULL, pred_CI = FALSE){
       (beta_plot <- beta_bs %>% 
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
+<<<<<<< HEAD
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
           # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
           # creating dashed line around 0
+=======
+          geom_point(aes(x = coef, y = FE)) +
+          geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE)) +
+>>>>>>> de026704c022feab095e36762226d2acbdaa6c47
           geom_vline(xintercept = 0, lty = "dashed") +
           # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
@@ -252,8 +262,11 @@ boot_param_CI <- function(nsim, model, data, newData = NULL, pred_CI = FALSE){
           dplyr::filter(FE != "(Intercept)") %>% 
           ggplot + 
           geom_point(aes(x = coef, y = FE), colour = "#00BFC4") +
+          # confidence intervals
           geom_segment(aes(x = lower, xend = upper, y = FE, yend = FE), colour = "#00BFC4") +
+          # creating dashed line at 0
           geom_vline(xintercept = 0, lty = "dashed") +
+          # adding model coefficient value to plot
           geom_text(aes(x = coef, y = FE, label = round(coef, 2),
                         vjust = -.6, hjust = .3), size = 3) +
           theme(legend.position = "none") +
@@ -429,7 +442,7 @@ boot_param_CI <- function(nsim, model, data, newData = NULL, pred_CI = FALSE){
       }
     }
   }
-  
+
   
   if(!is.null(newData)){
     return(list(betas, beta_bs, beta_plot, newData))
