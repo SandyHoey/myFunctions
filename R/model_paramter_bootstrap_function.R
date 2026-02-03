@@ -405,9 +405,7 @@ boot_param_CI <- function(nsim, model, data, newData = NULL){
       }
     }
   }
-  +
-    geom_point(aes(color = yvar < 0.5)) +
-    scale_color_manual(values = c("#DC3220", "#006CD1"))
+
   
   if(!is.null(newData)){
     return(list(betas, beta_bs, beta_plot, newData))
